@@ -1,0 +1,17 @@
+{
+  "name": "git-automation",
+  "version": "1.0.0",
+  "description": "A tool that automates git commits with AI-generated messages",
+  "bin": {
+    "git-auto": "./auto-commit.js"
+  },
+  "scripts": {
+    "start": "node auto-commit.js"
+  },
+  "dependencies": {
+    "simple-git": "^2.0.0",
+    "axios": "^0.21.1",
+    "inquirer": "^8.0.0",
+    "dotenv": "^16.0.0"
+  }
+}
