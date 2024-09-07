@@ -10,6 +10,7 @@ require('dotenv').config();
 const COHERE_API_URL = 'https://api.cohere.ai/generate';
 const COHERE_API_KEY = process.env.COHERE_API_KEY;
 const FOLDERS_TO_MONITOR = ['src', 'lib', 'components'];
+
 async function runGitCommand(command) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
@@ -44,6 +45,7 @@ async function generateCommitMessage(changes) {
 async function getModifiedFolders() {
   const status = await git.status();
   const modifiedFolders = new Set();
+
   status.files.forEach(file => {
     FOLDERS_TO_MONITOR.forEach(folder => {
       if (file.path.startsWith(folder)) {

@@ -44,6 +44,7 @@ async function generateCommitMessage(changes) {
 async function getModifiedFolders() {
   const status = await git.status();
   const modifiedFolders = new Set();
+
   status.files.forEach(file => {
     FOLDERS_TO_MONITOR.forEach(folder => {
       if (file.path.startsWith(folder)) {
