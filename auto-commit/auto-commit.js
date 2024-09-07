@@ -3,16 +3,20 @@
 const simpleGit = require('simple-git');
 const inquirer = require('inquirer');
 const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
 const git = simpleGit();
 const { exec } = require('child_process');
-require('dotenv').config(); 
+require('dotenv').config();
 
 const COHERE_API_URL = 'https://api.cohere.ai/generate';
 const COHERE_API_KEY = process.env.COHERE_API_KEY;
+
 const FOLDERS_TO_MONITOR = ['src', 'lib', 'components'];
-async function runGitCommand(command) {
+
+async function runGitCommand(command, cwd = process.cwd()) {
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    exec(command, { cwd }, (error, stdout, stderr) => {
       if (error) {
         reject(stderr);
       } else {
@@ -44,6 +48,7 @@ async function generateCommitMessage(changes) {
 async function getModifiedFolders() {
   const status = await git.status();
   const modifiedFolders = new Set();
+
   status.files.forEach(file => {
     FOLDERS_TO_MONITOR.forEach(folder => {
       if (file.path.startsWith(folder)) {
@@ -65,14 +70,19 @@ async function autoCommit() {
     }
 
     for (const folder of modifiedFolders) {
+      const folderPath = path.resolve(__dirname, folder); 
+      if (!fs.existsSync(folderPath)) {
+        console.error(`Folder does not exist: ${folderPath}`);
+        continue;
+      }
       console.log(`Processing folder: ${folder}`);
       console.log(`Staging changes in ${folder}...`);
-      await runGitCommand(`cd ${folder} && git add .`);
+      await runGitCommand('git add .', folderPath);
       const status = await git.status();
       const changes = status.files.map(file => `${file.path} - ${file.working_dir}`).join('\n');
       const commitMessage = await generateCommitMessage(changes);
       console.log(`Committing changes with message: "${commitMessage}"`);
-      await runGitCommand(`cd ${folder} && git commit -m "${commitMessage}"`);
+      await runGitCommand(`git commit -m "${commitMessage}"`, folderPath);
     }
 
     console.log('Pushing changes...');
